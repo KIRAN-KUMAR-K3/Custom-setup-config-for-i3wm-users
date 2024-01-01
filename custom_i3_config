@@ -68,3 +68,9 @@ xrandr --output HDMI-1-1 --auto --right-of eDP-1
 xrandr --output HDMI-1-1 --auto --left-of eDP-1
 EOF
 sudo chmod +x /bin/display-s /bin/display-r /bin/display-l
+
+# Restart i3wm
+i3-msg restart
+
+# System Update
+sudo apt update
