@@ -1,59 +1,25 @@
-#! /bin/bash
+#!/bin/bash
 
-#----------------------------------------------------------------This config is only made for i3wm users----------------------------------------------
-sudo apt install vlc -y
-sudo apt install libinput -y
-sudo apt install libinput-bin -y
-sudo apt install libinput-dev -y
-sudo apt install neofetch -y
-sudo apt install feh -y
-sudo apt install brightnessctl -y
-sudo apt install acpi -y
-sudo apt install htop -y
-sudo apt install vim -y
-sudo apt install figlet -y
-sudo apt install toilet -y
-sudo apt install build-essential -y
-sudo apt install net-tools -y
-sudo apt install openvpn -y
+# This script is designed for i3wm users on Kali Linux
 
-#-----------------------------------------------------------Optional tools-----------------------------------------------------------------------------
+# Basic System Utilities
+sudo apt install vlc libinput libinput-bin libinput-dev neofetch feh brightnessctl acpi htop vim figlet toilet build-essential net-tools openvpn -y
 
-sudo apt install curl -y
-sudo apt install wget -y
-sudo apt install guake -y
-sudo apt install goldendict -y
-sudo apt install youtubedl-gui -y
-sudo apt install git -y
-sudo apt install tor -y
-sudo apt install transmission -y
-sudo apt install samba -y
-sudo apt install onionshare -y
-sudo apt install proxychains -y
-sudo apt install cheese -y
-sudo apt install vsftpd -y
-sudo apt install ufw -y
+# Optional Tools
+sudo apt install curl wget guake goldendict youtubedl-gui git tor transmission samba onionshare proxychains cheese vsftpd ufw -y
 
-#-------------------------------------------------------Tor Browser installation-----------------------------------------------------------------------
+# Tor Browser Installation
 sudo apt install torbrowser-launcher -y
-#------------------------------------------------------------------------------------------------------------------------------------------------------
 
-#-------------------------------------------------------Brave Browser installation---------------------------------------------------------------------
+# Brave Browser Installation
 sudo curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
-
 echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main" | sudo tee /etc/apt/sources.list.d/brave-browser-release.list
-
 sudo apt update
 sudo apt install brave-browser -y
-#------------------------------------------------------------------------------------------------------------------------------------------------------
 
-#-------------------------------------------------------------Touchpad Config--------------------------------------------------------------------------
-#create a config file for touchpad configurations
+# Touchpad Configuration
 sudo touch /etc/X11/xorg.conf.d/90-touchpad.conf
-
-#append all the config codes to 90-touchpad config file
-#-------------------------------------------------------Don't alter these set of codes-----------------------------------------------------------------
-tee -a /etc/X11/xorg.conf.d/90-touchpad.conf <<EOF
+cat <<EOF | sudo tee -a /etc/X11/xorg.conf.d/90-touchpad.conf
 Section "InputClass"
 	Identifier "touchpad"
 	MatchIsTouchpad "on"
@@ -64,20 +30,17 @@ Section "InputClass"
 	Option "TappingButtonMap" "lrm"
 EndSection
 EOF
-#-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-#update i3wm config file
-tee -a ~/.config/i3/config <<EOF
-#=============================================================================================
-#--------------------------------------CUSTOMISATIONS-----------------------------------------
-#=============================================================================================
+# i3wm Configuration
+cat <<EOF | tee -a ~/.config/i3/config
+# =============================================================================================
+# ------------------------------------ CUSTOMIZATIONS ----------------------------------------
+# =============================================================================================
 
-### Desktop Background image(uncomment the below line and replace <path to image file> with the actual path.)
-#exec_always feh --bg-scale <path to image file>
+# Desktop Background image
+# exec_always feh --bg-scale <path to image file>
 
-#------------------------------------------------------Don't alter these set of codes-----------------------------------------------------------------
-###Shutdown options
-#bindsym \$mod+x mode "exit: [l]ogout, [r]eboot, [s]hutdown"
+# Shutdown options
 mode "exit: [l]ogout, [r]eboot, [s]hutdown" {
   bindsym l exec i3-msg exit
   bindsym r exec systemctl reboot
@@ -85,43 +48,23 @@ mode "exit: [l]ogout, [r]eboot, [s]hutdown" {
   bindsym Escape mode "default"
   bindsym Return mode "default"
 }
-bindsym \$mod+x mode "exit: [l]ogout, [r]eboot, [s]hutdown"
-bindsym \$mod+Shift+m exec display-s
-bindsym \$mod+Shift+p exec display-r
-bindsym \$mod+Shift+o exec display-l
-EOF
-#-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-#----------------------------------------Update bashrc and zshrc to automatically run neofetch while startup------------------------------------------
-tee -a ~/.bashrc <<EOF
-neofetch
+bindsym Mod+x mode "exit: [l]ogout, [r]eboot, [s]hutdown"
+bindsym Mod+Shift+m exec display-s
+bindsym Mod+Shift+p exec display-r
+bindsym Mod+Shift+o exec display-l
 EOF
 
-tee -a ~/.zshrc <<EOF
-neofetch
-EOF
+# Update bashrc and zshrc to run neofetch on startup
+echo 'neofetch' | tee -a ~/.bashrc ~/.zshrc
 
-# Installing xrandr
+# Install xrandr for Display Configuration
 sudo apt-get update
-sudo apt-get install x11-xserver-utils
+sudo apt-get install x11-xserver-utils -y
 
-# Checking connected displays
-xrandr
-# Identify the primary display, e.g., eDP-1, and the connected secondary display, e.g., HDMI-1-1
-
-# Creating scripts for display configurations
-echo 'xrandr --output HDMI-1-1 --auto --same-as eDP-1' > display-s
-echo 'xrandr --output HDMI-1-1 --auto --right-of eDP-1' > display-r
-echo 'xrandr --output HDMI-1-1 --auto --left-of eDP-1' > display-l
-
-# Granting execution permission to the scripts and moving them to /bin
-chmod +x display-s display-r display-l
-sudo mv display-s display-r display-l /bin/
-
-# Adding shortcuts in i3 configuration
-sudo nano ~/.config/i3/config
-
-# Add the following lines at the end of the file
-bindsym $mod+Shift+m exec display-s
-bindsym $mod+Shift+p exec display-r
-bindsym $mod
+# Display Configuration Scripts
+cat <<EOF | sudo tee /bin/display-s /bin/display-r /bin/display-l
+xrandr --output HDMI-1-1 --auto --same-as eDP-1
+xrandr --output HDMI-1-1 --auto --right-of eDP-1
+xrandr --output HDMI-1-1 --auto --left-of eDP-1
+EOF
+sudo chmod +x /bin/display-s /bin/display-r /bin/display-l
