@@ -18,20 +18,8 @@ sudo apt install net-tools -y
 sudo apt install openvpn -y
 
 #-----------------------------------------------------------Optional tools-----------------------------------------------------------------------------
-#-------------------------------------------------------Tor Browser installation-----------------------------------------------------------------------
-sudo apt install torbrowser-launcher -y
-#------------------------------------------------------------------------------------------------------------------------------------------------------
+
 sudo apt install curl -y
-
-#-------------------------------------------------------Brave Browser installation---------------------------------------------------------------------
-sudo curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
-
-echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main" | sudo tee /etc/apt/sources.list.d/brave-browser-release.list
-
-sudo apt update
-sudo apt install brave-browser -y
-#------------------------------------------------------------------------------------------------------------------------------------------------------
-
 sudo apt install wget -y
 sudo apt install guake -y
 sudo apt install goldendict -y
@@ -46,12 +34,25 @@ sudo apt install cheese -y
 sudo apt install vsftpd -y
 sudo apt install ufw -y
 
-#create a config file for touchpad configurations
+#-------------------------------------------------------Tor Browser installation-----------------------------------------------------------------------
+sudo apt install torbrowser-launcher -y
+#------------------------------------------------------------------------------------------------------------------------------------------------------
 
+#-------------------------------------------------------Brave Browser installation---------------------------------------------------------------------
+sudo curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
+
+echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main" | sudo tee /etc/apt/sources.list.d/brave-browser-release.list
+
+sudo apt update
+sudo apt install brave-browser -y
+#------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#-------------------------------------------------------------Touchpad Config--------------------------------------------------------------------------
+#create a config file for touchpad configurations
 sudo touch /etc/X11/xorg.conf.d/90-touchpad.conf
 
 #append all the config codes to 90-touchpad config file
-#------------------------------------------------------Don't alter these set of codes-----------------------------------------------------------------
+#-------------------------------------------------------Don't alter these set of codes-----------------------------------------------------------------
 tee -a /etc/X11/xorg.conf.d/90-touchpad.conf <<EOF
 Section "InputClass"
 	Identifier "touchpad"
@@ -64,21 +65,19 @@ Section "InputClass"
 EndSection
 EOF
 #-----------------------------------------------------------------------------------------------------------------------------------------------------
-#update i3wm config file
 
+#update i3wm config file
 tee -a ~/.config/i3/config <<EOF
 #=============================================================================================
 #--------------------------------------CUSTOMISATIONS-----------------------------------------
 #=============================================================================================
 
 ### Desktop Background image(uncomment the below line and replace <path to image file> with the actual path.)
-
 #exec_always feh --bg-scale <path to image file>
 
-
 #------------------------------------------------------Don't alter these set of codes-----------------------------------------------------------------
-###Shutdown opttions
-#bindsym $mod+x mode "exit: [l]ogout, [r]eboot, [s]hutdown"
+###Shutdown options
+#bindsym \$mod+x mode "exit: [l]ogout, [r]eboot, [s]hutdown"
 mode "exit: [l]ogout, [r]eboot, [s]hutdown" {
   bindsym l exec i3-msg exit
   bindsym r exec systemctl reboot
@@ -86,18 +85,43 @@ mode "exit: [l]ogout, [r]eboot, [s]hutdown" {
   bindsym Escape mode "default"
   bindsym Return mode "default"
 }
-bindsym $mod+x mode "exit: [l]ogout, [r]eboot, [s]hutdown"
+bindsym \$mod+x mode "exit: [l]ogout, [r]eboot, [s]hutdown"
+bindsym \$mod+Shift+m exec display-s
+bindsym \$mod+Shift+p exec display-r
+bindsym \$mod+Shift+o exec display-l
 EOF
 #-----------------------------------------------------------------------------------------------------------------------------------------------------
-#Update bashrc and zshrc to automatically run neofetch while startup
 
-tee -a .bashrc <<EOF
+#----------------------------------------Update bashrc and zshrc to automatically run neofetch while startup------------------------------------------
+tee -a ~/.bashrc <<EOF
 neofetch
 EOF
 
-tee -a .zshrc <<EOF
+tee -a ~/.zshrc <<EOF
 neofetch
 EOF
 
-#update the system
-sudo apt update
+# Installing xrandr
+sudo apt-get update
+sudo apt-get install x11-xserver-utils
+
+# Checking connected displays
+xrandr
+# Identify the primary display, e.g., eDP-1, and the connected secondary display, e.g., HDMI-1-1
+
+# Creating scripts for display configurations
+echo 'xrandr --output HDMI-1-1 --auto --same-as eDP-1' > display-s
+echo 'xrandr --output HDMI-1-1 --auto --right-of eDP-1' > display-r
+echo 'xrandr --output HDMI-1-1 --auto --left-of eDP-1' > display-l
+
+# Granting execution permission to the scripts and moving them to /bin
+chmod +x display-s display-r display-l
+sudo mv display-s display-r display-l /bin/
+
+# Adding shortcuts in i3 configuration
+sudo nano ~/.config/i3/config
+
+# Add the following lines at the end of the file
+bindsym $mod+Shift+m exec display-s
+bindsym $mod+Shift+p exec display-r
+bindsym $mod
